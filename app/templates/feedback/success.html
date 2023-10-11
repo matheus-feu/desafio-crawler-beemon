@@ -1,0 +1,15 @@
+{% extends '_layouts/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="text-center">
+                <h1>Obrigado!</h1>
+                <p>Seu feedback foi registrado com sucesso.</p>
+                <p>Se você tem mais a dizer, você pode <a href="{% url 'feedback' %}">enviar outro feedback</a>.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+
+  # Serviço da aplicação web Django
+  web:
+    container_name: django
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - celery
+      - celery-beat
+    volumes:
+      - .:/app
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Serviço do Celery Worker
+  celery:
+    container_name: celery
+    build: .
+    volumes:
+      - .:/app
+    command: celery -A core worker -l info
+
+  # Serviço do Celery Beat (agendamento de tarefas)
+  celery-beat:
+    container_name: celery-beat
+    build: .
+    volumes:
+      - .:/app
+    command: celery -A core beat -l info
