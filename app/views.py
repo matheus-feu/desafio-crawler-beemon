@@ -1,7 +1,7 @@
 import os
 
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
@@ -63,12 +63,11 @@ def home(request):
                         imdb_scraper.scrape()
                         data_html = imdb_scraper.save_type_info(arquivo)
                         imdb_scraper.save_in_db()
+
                     elif arquivo == 'json':
                         imdb_scraper.scrape()
                         data_json = imdb_scraper.save_type_info(arquivo)
                         imdb_scraper.save_in_db()
-                    else:
-                        messages.error(request, 'Tipo de arquivo inválido.')
 
                 except Exception as e:
                     messages.error(request, f'Ocorreu um erro inesperado: {str(e)}')

@@ -5,9 +5,6 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
 from app.helpers.setup_logger import logger
 from app.pipelines import PostgreSQLPipeline
@@ -55,55 +52,19 @@ class IMDbScraper:
         """
         return ''.join(text.split('.')[1:]).strip().replace("'", "")
 
-    def find_elements(self, id=None, xpath=None, class_name=None, tag_name=None, css_selector=None):
-        """
-        Função para encontrar elementos na página de forma dinâmica, sem precisa setar o xpath por exemplo,
-        como path do caminho para localizar os elementos.
-        """
-        if id is not None:
-            element = self.soup.find(id=id)
-            if element is not None:
-                return element
-
-        if xpath is not None:
-            element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, xpath)))
-            if element is not None:
-                return element
-
-        if tag_name is not None:
-            elements = self.soup.find_all(tag_name)
-            if elements:
-                return elements
-
-        if class_name is not None:
-            elements = self.soup.find_all(class_=class_name)
-            if elements:
-                return elements
-
-        if css_selector is not None:
-            elements = self.soup.select(css_selector)
-            if elements:
-                return elements
-
-        return None
-
     def find_movie_elements(self):
-        return self.find_elements(
-            tag_name='li',
-            class_name='ipc-metadata-list-summary-item sc-59b6048d-0 jemTre cli-parent'
-        )
+        return self.soup.find_all('li', class_='ipc-metadata-list-summary-item sc-59b6048d-0 jemTre cli-parent')
 
     def get_movie_data(self, movie_element):
         title_element = movie_element.find('h3', class_='ipc-title__text')
         img_element = movie_element.find('img', class_='ipc-image')
-        metadata_element = movie_element.find('div', class_='sc-6fa21551-7 jLjTzn cli-title-metadata')
+        metadata_element = movie_element.find('div', class_='sc-c7e5f54-7 brlapf cli-title-metadata')
         ratings_element = movie_element.find('div',
-                                             class_='sc-e3e7b191-0 iKUUVe sc-6fa21551-2 kOfhdG cli-ratings-container')
+                                             class_='sc-e3e7b191-0 iKUUVe sc-c7e5f54-2 hCiLPi cli-ratings-container')
 
         if metadata_element and ratings_element:
-            year_element = metadata_element.find_all('span', class_='sc-6fa21551-8 bnyjtW cli-title-metadata-item')[0]
-            duration_element = metadata_element.find_all('span', class_='sc-6fa21551-8 bnyjtW cli-title-metadata-item')[
-                1]
+            year_element = metadata_element.find_all('span', class_='sc-c7e5f54-8 hgjcbi cli-title-metadata-item')[0]
+            duration_element = metadata_element.find_all('span', class_='sc-c7e5f54-8 hgjcbi cli-title-metadata-item')[1]
             rating_element = ratings_element.find('span',
                                                   class_='ipc-rating-star ipc-rating-star--base ipc-rating-star--imdb ratingGroup--imdb-rating')
             votes_element = ratings_element.find('span', class_='ipc-rating-star--voteCount')
@@ -197,7 +158,7 @@ class IMDbScraper:
         self.driver = self.initialize_selenium()
         self.driver.get(self.url)
         logger.info(f'Getting {self.url}...')
-        time.sleep(5)
+        time.sleep(10)
 
         self.soup = BeautifulSoup(self.driver.page_source, 'html.parser')
         self.driver.save_screenshot('screenshot.png')
